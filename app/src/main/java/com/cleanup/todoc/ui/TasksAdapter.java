@@ -15,6 +15,7 @@ import com.cleanup.todoc.model.Project;
 import com.cleanup.todoc.model.Task;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>Adapter which handles the list of tasks to display in the dedicated RecyclerView.</p>
@@ -27,6 +28,9 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
      */
     @NonNull
     private List<Task> tasks;
+
+
+    private Map<Long, Project> projectMap;
 
     /**
      * The listener for when a task needs to be deleted
@@ -63,12 +67,17 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
 
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder taskViewHolder, int position) {
-        taskViewHolder.bind(tasks.get(position));
+
+        taskViewHolder.bind(tasks.get(position), projectMap.get(tasks.get(position).getProjectId()) );
     }
 
     @Override
     public int getItemCount() {
         return tasks.size();
+    }
+
+    public void setProjectMap(Map<Long, Project> projectMap) {
+        this.projectMap = projectMap;
     }
 
     /**
@@ -146,14 +155,12 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TaskViewHold
          *
          * @param task the task to bind in the item view
          */
-        void bind(Task task) {
+        void bind(Task task, Project project) {
             lblTaskName.setText(task.getName());
             imgDelete.setTag(task);
-
-            final Project taskProject = task.getProject();
-            if (taskProject != null) {
-                imgProject.setSupportImageTintList(ColorStateList.valueOf(taskProject.getColor()));
-                lblProjectName.setText(taskProject.getName());
+            if (project != null) {
+                imgProject.setSupportImageTintList(ColorStateList.valueOf(project.getColor()));
+                lblProjectName.setText(project.getName());
             } else {
                 imgProject.setVisibility(View.INVISIBLE);
                 lblProjectName.setText("");

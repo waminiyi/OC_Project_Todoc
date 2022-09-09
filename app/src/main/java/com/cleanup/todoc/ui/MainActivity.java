@@ -15,16 +15,23 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cleanup.todoc.R;
 import com.cleanup.todoc.model.Project;
 import com.cleanup.todoc.model.Task;
+import com.cleanup.todoc.viewmodels.ProjectViewModel;
+import com.cleanup.todoc.viewmodels.TaskViewModel;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>Home activity of the application which is displayed when the user opens the app.</p>
@@ -33,21 +40,24 @@ import java.util.Date;
  * @author Gaëtan HERFRAY
  */
 public class MainActivity extends AppCompatActivity implements TasksAdapter.DeleteTaskListener {
+
+    private ProjectViewModel mProjectViewModel;
+    private TaskViewModel mTaskViewModel;
+
     /**
      * List of all projects available in the application
      */
-    private final Project[] allProjects = Project.getAllProjects();
+    private List<Project> mProjectList;
 
     /**
      * List of all current tasks of the application
      */
-    @NonNull
-    private final ArrayList<Task> tasks = new ArrayList<>();
+    private List<Task> tasks = new ArrayList<>();
 
     /**
      * The adapter which handles the list of tasks
      */
-    private final TasksAdapter adapter = new TasksAdapter(tasks, this);
+    private TasksAdapter adapter;
 
     /**
      * The sort method to be used to display tasks
@@ -97,8 +107,11 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
 
         listTasks = findViewById(R.id.list_tasks);
         lblNoTasks = findViewById(R.id.lbl_no_task);
+        mTaskViewModel = new ViewModelProvider(this).get(TaskViewModel.class);
+        mProjectViewModel = new ViewModelProvider(this).get(ProjectViewModel.class);
 
         listTasks.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        adapter = new TasksAdapter(tasks, this);
         listTasks.setAdapter(adapter);
 
         findViewById(R.id.fab_add_task).setOnClickListener(new View.OnClickListener() {
@@ -107,7 +120,25 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
                 showAddTaskDialog();
             }
         });
+
+        mProjectViewModel.getAllProjects().observe(this, new Observer<List<Project>>() {
+            @Override
+            public void onChanged(List<Project> projects) {
+                setProjectList(projects);
+                adapter.setProjectMap(getProjectMap(projects));
+            }
+        });
+
+        mTaskViewModel.getAllTasks().observe(this, new Observer<List<Task>>() {
+            @Override
+            public void onChanged(@Nullable final List<Task> taskList) {
+                tasks = taskList;
+                updateTasks();
+            }
+        });
+
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -117,6 +148,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         int id = item.getItemId();
 
         if (id == R.id.filter_alphabetical) {
@@ -132,12 +164,12 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
         updateTasks();
 
         return super.onOptionsItemSelected(item);
+
     }
 
     @Override
     public void onDeleteTask(Task task) {
-        tasks.remove(task);
-        updateTasks();
+        mTaskViewModel.delete(task);
     }
 
     /**
@@ -163,13 +195,8 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
             }
             // If both project and name of the task have been set
             else if (taskProject != null) {
-                // TODO: Replace this by id of persisted task
-                long id = (long) (Math.random() * 50000);
 
-
-                Task task = new Task(
-                        id,
-                        taskProject.getId(),
+                Task task = new Task(taskProject.getId(),
                         taskName,
                         new Date().getTime()
                 );
@@ -179,7 +206,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
                 dialogInterface.dismiss();
             }
             // If name has been set, but project has not been set (this should never occur)
-            else{
+            else {
                 dialogInterface.dismiss();
             }
         }
@@ -188,6 +215,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
             dialogInterface.dismiss();
         }
     }
+
 
     /**
      * Shows the Dialog for adding a Task
@@ -209,8 +237,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
      * @param task the task to be added to the list
      */
     private void addTask(@NonNull Task task) {
-        tasks.add(task);
-        updateTasks();
+        mTaskViewModel.insert(task);
     }
 
     /**
@@ -289,7 +316,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
      * Sets the data of the Spinner with projects to associate to a new task
      */
     private void populateDialogSpinner() {
-        final ArrayAdapter<Project> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, allProjects);
+        final ArrayAdapter<Project> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, mProjectList.toArray(new Project[0]));
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         if (dialogSpinner != null) {
             dialogSpinner.setAdapter(adapter);
@@ -321,4 +348,19 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
          */
         NONE
     }
+
+
+    private Map<Long, Project> getProjectMap(List<Project> projectList) {
+        Map<Long, Project> projectMap = new HashMap<Long, Project>();
+        for (int i = 0; i < projectList.size(); i++) {
+            Project project = projectList.get(i);
+            projectMap.put(project.getId(), project);
+        }
+        return projectMap;
+    }
+
+    public void setProjectList(List<Project> projectList) {
+        mProjectList = projectList;
+    }
+
 }
