@@ -4,7 +4,6 @@ package com.cleanup.todoc.model;
 import static androidx.room.ForeignKey.CASCADE;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
@@ -17,8 +16,8 @@ import java.util.Comparator;
  * @author Gaëtan HERFRAY
  */
 
-@Entity(foreignKeys = {@ForeignKey(entity = Project.class,
-        parentColumns = "id", childColumns = "projectId", onDelete = CASCADE, onUpdate = CASCADE)})
+@Entity(foreignKeys = {@ForeignKey(entity = Project.class, parentColumns = "id",
+        childColumns = "projectId", onDelete = CASCADE, onUpdate = CASCADE)})
 
 public class Task {
     /**
@@ -86,15 +85,6 @@ public class Task {
         this.projectId = projectId;
     }
 
-    /**
-     * Returns the project associated to the task.
-     *
-     * @return the project associated to the task
-     */
-//    @Nullable
-//    public Project getProject() {
-//        return Project.getProjectById(projectId);
-//    }
 
     /**
      * Returns the name of the task.

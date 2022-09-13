@@ -93,11 +93,11 @@ public abstract class TodocDatabase extends RoomDatabase {
             for (int i = 0; i <= projects.length - 1; i++) {
                 projectDao.insert(projects[i]);
             }
-
-
-            for (int j = 0; j <= tasks.length - 1; j++) {
-                taskDao.insert(tasks[j]);
-            }
+//
+////
+//            for (int j = 0; j <= tasks.length - 1; j++) {
+//                taskDao.insert(tasks[j]);
+//            }
             return null;
         }
     }

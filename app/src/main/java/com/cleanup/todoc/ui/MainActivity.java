@@ -164,7 +164,6 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
         updateTasks();
 
         return super.onOptionsItemSelected(item);
-
     }
 
     @Override
