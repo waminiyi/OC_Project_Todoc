@@ -17,6 +17,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -43,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
 
     private ProjectViewModel mProjectViewModel;
     private TaskViewModel mTaskViewModel;
+    private int mColumnCount;
 
     /**
      * List of all projects available in the application
@@ -109,8 +111,10 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
         lblNoTasks = findViewById(R.id.lbl_no_task);
         mTaskViewModel = new ViewModelProvider(this).get(TaskViewModel.class);
         mProjectViewModel = new ViewModelProvider(this).get(ProjectViewModel.class);
+        mColumnCount = getResources().getInteger(R.integer.column_count);
 
-        listTasks.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        listTasks.setLayoutManager(new GridLayoutManager(this, mColumnCount));
+//        listTasks.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         adapter = new TasksAdapter(tasks, this);
         listTasks.setAdapter(adapter);
 
@@ -262,7 +266,6 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
                 case OLD_FIRST:
                     Collections.sort(tasks, new Task.TaskOldComparator());
                     break;
-
             }
             adapter.updateTasks(tasks);
         }
