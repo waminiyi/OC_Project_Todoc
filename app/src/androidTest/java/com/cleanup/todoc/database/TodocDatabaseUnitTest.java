@@ -103,7 +103,7 @@ public class TodocDatabaseUnitTest {
         taskList = LiveDataTestUtil.getValue(taskDao.getAllTasks());
 
 
-//        // to ensure the task is inserted, we'll compare projectId, name and creationTimeStamp
+        // to ensure the task is inserted, we'll compare projectId, name and creationTimeStamp
         assertEquals(task1.getProjectId(), taskList.get(0).getProjectId());
         assertEquals(task1.getName(), taskList.get(0).getName());
         assertEquals(task1.getCreationTimestamp(), taskList.get(0).getCreationTimestamp());
